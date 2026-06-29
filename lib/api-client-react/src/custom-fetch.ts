@@ -356,6 +356,14 @@ export async function customFetch<T = unknown>(
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
+  } else {
+    // Tasami specific: read from localStorage if running in browser
+    if (typeof window !== "undefined" && !headers.has("authorization")) {
+      const tasamiToken = localStorage.getItem("tasami_token");
+      if (tasamiToken) {
+        headers.set("authorization", `Bearer ${tasamiToken}`);
+      }
+    }
   }
 
   const requestInfo = { method, url: resolveUrl(input) };
