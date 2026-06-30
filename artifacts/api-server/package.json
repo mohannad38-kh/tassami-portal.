@@ -10,8 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@workspace/api-zod": "file:../api-zod",
-    "@workspace/db": "file:../db",
+    "@workspace/api-zod": "file:./libs/api-zod",
+    "@workspace/db": "file:./libs/db",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
