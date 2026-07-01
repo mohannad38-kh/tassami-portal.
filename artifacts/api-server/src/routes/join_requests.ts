@@ -2,26 +2,26 @@ import { Router, type IRouter } from "express";
 import { db, joinRequestsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../lib/auth";
+import * as nodemailer from "nodemailer";
 
 const router: IRouter = Router();
 
 async function sendApprovalEmail(name: string, email: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
   try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + apiKey,
-        "Content-Type": "application/json",
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
       },
-      body: JSON.stringify({
-        from: "Tasami <onboarding@resend.dev>",
-        to: [email],
-        subject: "تم قبول طلب انضمامك إلى مبادرة تسامي",
-        html: "<div dir=\"rtl\" style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\"><h2 style=\"color: #8B0000;\">مرحباً " + name + " 🎉</h2><p style=\"font-size: 16px; line-height: 1.8;\">يسعدنا إبلاغك بأنه تم قبول طلب انضمامك إلى <strong style=\"color: #D4AF37;\">مبادرة تسامي التطوعية</strong>.</p><p style=\"font-size: 16px; line-height: 1.8;\">نتطلع للعمل معك وصناعة أثر إيجابي مستدام في مجتمعنا.</p><p style=\"font-size: 14px; color: #888; margin-top: 30px;\">فريق مبادرة تسامي</p></div>",
-      }),
     });
+    await transporter.sendMail({
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: "تم قبول طلب انضمامك إلى مبادرة تسامي",
+      html: "<div dir=\"rtl\" style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\"><h2 style=\"color: #8B0000;\">مرحباً " + name + " 🎉</h2><p style=\"font-size: 16px; line-height: 1.8;\">يسعدنا إبلاغك بأنه تم قبول طلب انضمامك إلى <strong style=\"color: #D4AF37;\">مبادرة تسامي التطوعية</strong>.</p><p style=\"font-size: 16px; line-height: 1.8;\">نتطلع للعمل معك وصناعة أثر إيجابي مستدام في مجتمعنا.</p><p style=\"font-size: 14px; color: #888; margin-top: 30px;\">فريق مبادرة تسامي</p></div>",
+    });
+    console.log("Approval email sent to:", email);
   } catch (err) {
     console.error("Failed to send approval email:", err);
   }
